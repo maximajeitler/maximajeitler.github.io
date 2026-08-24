@@ -1,0 +1,762 @@
+/* =========================================================
+   MAXED OUT. — Design tokens & base system
+   Farben, Type-Skala und Abstands-Skala 1:1 aus der
+   Brand-Summary abgeleitet. Keine Zufallswerte.
+   ========================================================= */
+
+@font-face {
+  font-family: 'Unbounded-fallback';
+  size-adjust: 100%;
+  src: local('Arial');
+}
+
+:root {
+  /* ---- Farben (exakt aus Brand-Summary) ---- */
+  --near-black: #15140D;
+  --olive: #2F3227;
+  --olive-soft: #3A3D30;
+  --rust: #B5502D;
+  --rust-bright: #C86438;
+  --taupe: #8A7A5C;
+  --sand: #EDE6D6;
+  --sand-dim: rgba(237, 230, 214, 0.72);
+
+  /* ---- Fonts ---- */
+  --font-display: 'Unbounded', 'Unbounded-fallback', sans-serif;
+  --font-body: 'Sora', system-ui, sans-serif;
+
+  /* ---- Type-Skala: Größe / Line-height / Tracking ----
+     Regel: große Schrift = enger Zeilenabstand + negatives
+     Tracking. Kleine Schrift = lockerer + leicht positives
+     Tracking. */
+  --fs-hero: clamp(2.75rem, 6vw, 5rem);
+  --lh-hero: 1.03;
+  --ls-hero: -0.025em;
+
+  --fs-h2: clamp(2rem, 4vw, 3rem);
+  --lh-h2: 1.08;
+  --ls-h2: -0.02em;
+
+  --fs-h3: 1.5rem;
+  --lh-h3: 1.2;
+  --ls-h3: -0.01em;
+
+  --fs-body-lg: 1.25rem;
+  --lh-body-lg: 1.55;
+  --ls-body-lg: 0em;
+
+  --fs-body: 1.0625rem;
+  --lh-body: 1.65;
+  --ls-body: 0em;
+
+  --fs-caption: 0.875rem;
+  --lh-caption: 1.5;
+  --ls-caption: 0.01em;
+
+  /* ---- Abstands-Skala (eine Zahlenreihe, rem-basiert) ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ---- Material ---- */
+  --glass-bg: rgba(21, 20, 13, 0.55);
+  --glass-blur: 20px;
+  --glass-edge: rgba(237, 230, 214, 0.14);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.75rem;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.28);
+  --shadow-lg: 0 24px 64px rgba(0,0,0,0.38);
+}
+
+/* Reduced transparency: Glas wird zu deckender Fläche */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--near-black);
+    --glass-blur: 0px;
+  }
+}
+
+/* Mehr Kontrast: klar begrenzte, fast deckende Flächen */
+@media (prefers-contrast: more) {
+  :root {
+    --glass-bg: var(--near-black);
+    --glass-blur: 0px;
+    --glass-edge: rgba(237, 230, 214, 0.55);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 100%;
+  scroll-behavior: smooth; /* funktioniert nativ per CSS, unabhängig von JS */
+  scroll-padding-top: 6rem; /* damit die Sticky-Nav nichts verdeckt */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-body);
+  color: var(--sand);
+  background: var(--near-black);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, p, ul { margin: 0; }
+
+ul { padding: 0; list-style: none; }
+
+/* Sichtbarer Fokus — Craft/Accessibility-Boden */
+:focus-visible {
+  outline: 2px solid var(--rust-bright);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.container {
+  width: min(72rem, 100% - 2 * var(--space-6));
+  margin-inline: auto;
+}
+
+@media (min-width: 48em) {
+  .container { width: min(72rem, 100% - 2 * var(--space-12)); }
+}
+
+/* =========================================================
+   Typografie-Klassen
+   ========================================================= */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: var(--lh-caption);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rust-bright);
+  font-weight: 600;
+}
+
+.eyebrow__bar {
+  display: inline-block;
+  width: 1.75rem;
+  height: 2px;
+  background: var(--rust-bright);
+  flex-shrink: 0;
+}
+
+.display-1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  line-height: var(--lh-hero);
+  letter-spacing: var(--ls-hero);
+  font-weight: 700;
+  color: var(--sand);
+}
+
+.display-2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  letter-spacing: var(--ls-h2);
+  font-weight: 600;
+  color: var(--sand);
+}
+
+.display-3 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  font-weight: 600;
+  color: var(--sand);
+}
+
+.body-lg {
+  font-size: var(--fs-body-lg);
+  line-height: var(--lh-body-lg);
+  letter-spacing: var(--ls-body-lg);
+  color: var(--sand-dim);
+  font-weight: 300;
+}
+
+.caption {
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  letter-spacing: var(--ls-caption);
+  color: var(--taupe);
+}
+
+.accent-text { color: var(--rust-bright); }
+
+/* Orange Schlusspunkt bei Überschriften, die im Text
+   bereits einen Punkt tragen (kein erfundenes Zeichen —
+   nur eingefärbt) */
+.dot-accent { color: var(--rust-bright); }
+
+/* =========================================================
+   Sektionen — alternierend Olive / Near-Black
+   ========================================================= */
+
+.section {
+  padding-block: var(--space-32);
+  position: relative;
+  overflow: hidden;
+}
+
+.section--olive { background: var(--olive); }
+.section--black { background: var(--near-black); }
+
+.section .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   Glow — der Hintergrund spielt durchgehend mit Orange/Olive,
+   in wechselnden Positionen pro Sektion. Deckkraft bewusst
+   niedrig gehalten, damit Text/Kontrast nicht leidet.
+   ========================================================= */
+
+.glow {
+  position: absolute;
+  inset: -15% -10%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow--hero {
+  background:
+    radial-gradient(50% 55% at 22% 12%, rgba(200,100,56,0.32), transparent 68%),
+    radial-gradient(38% 42% at 88% 82%, rgba(138,122,92,0.22), transparent 70%);
+}
+
+.glow--about {
+  background:
+    radial-gradient(42% 46% at 92% 8%, rgba(181,80,45,0.16), transparent 70%),
+    radial-gradient(46% 46% at 6% 96%, rgba(138,122,92,0.14), transparent 72%);
+}
+
+.glow--services {
+  background: radial-gradient(58% 58% at 50% -5%, rgba(200,100,56,0.24), transparent 68%);
+}
+
+.glow--process {
+  background:
+    radial-gradient(40% 50% at -5% 45%, rgba(181,80,45,0.16), transparent 70%),
+    radial-gradient(40% 40% at 105% 90%, rgba(138,122,92,0.14), transparent 70%);
+}
+
+.glow--closing {
+  background: radial-gradient(60% 65% at 50% 25%, rgba(200,100,56,0.34), transparent 68%);
+}
+
+@media (max-width: 40em) {
+  .section { padding-block: var(--space-24); }
+}
+
+/* Scroll-Kante: weicher Fade statt harter Linie, nur dort
+   wo das Glas der Nav tatsächlich Inhalt überlappt. */
+.section:first-of-type::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5.5rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.18), transparent);
+}
+
+/* =========================================================
+   Navigation — Glas-Ebene
+   ========================================================= */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--space-8);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Offizielle Logo-Dateien — unverändert, nur höhenskaliert */
+.logo {
+  display: block;
+  width: auto;
+}
+
+.logo--nav {
+  height: 3.5rem;
+}
+
+.logo--footer {
+  height: 1.5rem;
+}
+
+@media (max-width: 30em) {
+  .logo--nav { height: 2.75rem; }
+}
+
+.nav__links {
+  display: none;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+@media (min-width: 48em) {
+  .nav__links { display: flex; }
+}
+
+.nav__link {
+  font-size: var(--fs-body);
+  color: var(--sand-dim);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-1);
+}
+
+.nav__link:hover { color: var(--sand); }
+
+.nav__cta {
+  display: none;
+}
+
+.nav__cta.btn {
+  padding: var(--space-3) var(--space-6);
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 48em) {
+  .nav__cta { display: inline-flex; }
+}
+
+.nav__burger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: transparent;
+  border: none;
+  color: var(--sand);
+  cursor: pointer;
+}
+
+@media (min-width: 48em) {
+  .nav__burger { display: none; }
+}
+
+/* Mobile Drawer */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.drawer[data-open="true"] { pointer-events: auto; }
+
+.drawer__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(21,20,13,0.6);
+  opacity: 0;
+}
+
+.drawer__panel {
+  position: relative;
+  width: min(20rem, 82vw);
+  height: 100%;
+  background: var(--near-black);
+  border-left: 1px solid var(--glass-edge);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  transform: translateX(100%);
+  transform-origin: top right;
+}
+
+.drawer__close {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var(--sand);
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.drawer__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.drawer__links a {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--sand);
+}
+
+/* =========================================================
+   Buttons — einzige stark gesättigte Fläche im System
+   ========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--fs-body);
+  border: 1px solid transparent;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.btn--primary {
+  background-color: var(--rust);
+  color: var(--sand);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--primary:hover { background-color: var(--rust-bright); }
+
+.btn--ghost {
+  background-color: transparent;
+  border-color: var(--glass-edge);
+  color: var(--sand);
+}
+
+.btn--ghost:hover { border-color: var(--taupe); }
+
+@media (prefers-contrast: more) {
+  .btn--ghost { border-color: var(--sand); }
+}
+
+/* =========================================================
+   Cursor-Licht — folgt der Maus über dem Button und
+   leuchtet genau dort sanft auf. Die Position (--mx/--my)
+   wird 1:1 vom Cursor übernommen (kein Lag gewünscht), nur
+   das Auf-/Abblenden beim Rein-/Rausfahren läuft gefedert.
+   Ohne JS bleibt --glow-a bei 0 → kein Effekt, aber der
+   Button funktioniert ganz normal weiter.
+   ========================================================= */
+
+.btn,
+.social-link,
+.scroll-cue {
+  --mx: 50%;
+  --my: 50%;
+  --glow-a: 0;
+  position: relative;
+  background-image: radial-gradient(
+    140px circle at var(--mx) var(--my),
+    rgba(255, 255, 255, var(--glow-a)),
+    transparent 70%
+  );
+  background-repeat: no-repeat;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .social-link, .scroll-cue { background-image: none; }
+}
+
+/* =========================================================
+   Hero
+   ========================================================= */
+
+.hero {
+  padding-top: var(--space-24);
+  padding-bottom: var(--space-24);
+  position: relative;
+}
+
+.hero__grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero__content { display: flex; flex-direction: column; gap: var(--space-6); }
+
+.hero__actions { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-4); }
+
+.hero__content {
+  max-width: 44rem;
+  margin-inline: auto;
+  text-align: center;
+  align-items: center;
+}
+
+.hero__actions { justify-content: center; }
+
+/* =========================================================
+   Scroll-Cue — ersetzt den zweiten CTA im Hero (der ist
+   schon in der Nav). Führt zu "Wer bin ich".
+   ========================================================= */
+
+.scroll-cue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--glass-edge);
+  color: var(--sand);
+  will-change: transform;
+}
+
+.scroll-cue:hover {
+  border-color: var(--rust-bright);
+  color: var(--rust-bright);
+}
+
+/* =========================================================
+   Wer bin ich
+   ========================================================= */
+
+.about__grid {
+  display: grid;
+  gap: var(--space-16);
+}
+
+@media (min-width: 60em) {
+  .about__grid { grid-template-columns: 0.85fr 1.15fr; align-items: start; }
+}
+
+.about__portrait {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.about__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+
+.about__portrait--placeholder {
+  border: 1px dashed var(--taupe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--taupe);
+  font-size: var(--fs-caption);
+  background: rgba(138,122,92,0.08);
+}
+
+.about__copy { display: flex; flex-direction: column; gap: var(--space-6); }
+
+/* =========================================================
+   Services — Cards, deckend, mit Schatten
+   ========================================================= */
+
+.services__grid {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-16);
+}
+
+@media (min-width: 40em) {
+  .services__grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.card {
+  background: var(--olive-soft);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-md);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  will-change: transform;
+}
+
+.section--black .card { background: rgba(237,230,214,0.05); }
+
+.card__index {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  color: var(--rust-bright);
+  letter-spacing: 0.08em;
+}
+
+/* =========================================================
+   Prozess — echte Sequenz, daher Nummerierung gerechtfertigt
+   ========================================================= */
+
+.process__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+}
+
+.process__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--glass-edge);
+}
+
+.process__item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.process__num {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  color: var(--taupe);
+  line-height: 1;
+}
+
+/* =========================================================
+   Closing CTA — identischer Pfad/Stil wie Hero-CTA
+   ========================================================= */
+
+.closing {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.closing__socials {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--sand-dim);
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius-lg);
+  color: var(--sand-dim);
+  font-weight: 500;
+  will-change: transform;
+}
+
+.social-link:hover {
+  border-color: var(--rust-bright);
+  color: var(--sand);
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+
+.footer {
+  padding-block: var(--space-12);
+  border-top: 1px solid var(--glass-edge);
+}
+
+.footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer__links { display: flex; gap: var(--space-6); }
+
+.footer__links a { color: var(--taupe); font-size: var(--fs-caption); }
+.footer__links a:hover { color: var(--sand); }
+
+/* =========================================================
+   Legal pages (Impressum / Datenschutz)
+   ========================================================= */
+
+.legal {
+  padding-block: var(--space-32) var(--space-24);
+}
+
+.legal__body {
+  margin-top: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: 42rem;
+}
+
+.legal__body h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: -0.005em;
+  color: var(--sand);
+  margin-bottom: var(--space-2);
+}
+
+.legal__body p { color: var(--sand-dim); }
+
+.legal__back {
+  display: inline-flex;
+  gap: var(--space-2);
+  color: var(--rust-bright);
+  font-weight: 600;
+  margin-bottom: var(--space-8);
+}
+
+/* =========================================================
+   Reveal — Sichtbarkeit ist NIE von JS abhängig. Der
+   Ausgangszustand ist immer "sichtbar"; das Skript setzt
+   den unsichtbaren Startzustand nur, wenn es tatsächlich
+   läuft, und blendet danach ein. Läuft kein JS (blockiert,
+   langsames Netz, CDN down), bleibt der Inhalt einfach da.
+   ========================================================= */
+
+/* =========================================================
+   Reduced motion: keine springbasierte Bewegung, nur
+   sanfte Opacity-Überblendung
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
