@@ -528,22 +528,6 @@ ul { padding: 0; list-style: none; }
 
 .hero__actions { justify-content: center; }
 
-.hero__gauge-wrap {
-  width: min(15rem, 55vw);
-  margin-inline: auto;
-}
-
-.hero-gauge {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.gauge__needle {
-  transform-origin: 297.5px 512.476562px;
-  will-change: transform;
-}
-
 /* =========================================================
    Scroll-Cue — ersetzt den zweiten CTA im Hero (der ist
    schon in der Nav). Führt zu "Wer bin ich".
