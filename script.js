@@ -200,10 +200,23 @@ function animateScrollTo(targetY, duration) {
   const diff = targetY - startY;
   const startTime = performance.now();
 
+  // Wichtig: html hat CSS scroll-behavior:smooth. Ohne diese Zeile
+  // würde JEDER scrollTo()-Aufruf zusätzlich vom Browser selbst
+  // "smooth" interpoliert — zwei Animationen kämpfen gegeneinander,
+  // das erzeugt genau das Ruckeln. Für die Dauer unserer eigenen
+  // Animation schalten wir das kurz aus und danach wieder an.
+  const html = document.documentElement;
+  const previousBehavior = html.style.scrollBehavior;
+  html.style.scrollBehavior = "auto";
+
   function step(now) {
     const progress = Math.min((now - startTime) / duration, 1);
     window.scrollTo(0, startY + diff * easeInOutCubic(progress));
-    if (progress < 1) requestAnimationFrame(step);
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      html.style.scrollBehavior = previousBehavior;
+    }
   }
   requestAnimationFrame(step);
 }
