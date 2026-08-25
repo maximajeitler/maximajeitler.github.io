@@ -349,17 +349,14 @@ ul { padding: 0; list-style: none; }
 
 .nav__link:hover { color: var(--sand); }
 
-.nav__cta {
-  display: none;
-}
-
 .nav__cta.btn {
+  display: none;
   padding: var(--space-3) var(--space-6);
   font-size: 0.9375rem;
 }
 
 @media (min-width: 48em) {
-  .nav__cta { display: inline-flex; }
+  .nav__cta.btn { display: inline-flex; }
 }
 
 .nav__burger {
@@ -554,17 +551,38 @@ ul { padding: 0; list-style: none; }
 
 .about__grid {
   display: grid;
-  gap: var(--space-16);
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "photo intro"
+    "body  body";
+  column-gap: var(--space-4);
+  row-gap: var(--space-8);
+  align-items: center;
 }
 
 @media (min-width: 60em) {
-  .about__grid { grid-template-columns: 0.85fr 1.15fr; align-items: start; }
+  .about__grid {
+    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-areas:
+      "photo intro"
+      "photo body";
+    column-gap: var(--space-16);
+    row-gap: var(--space-6);
+    align-items: start;
+  }
 }
 
 .about__portrait {
+  grid-area: photo;
+  width: 6.5rem;
   aspect-ratio: 4 / 5;
   border-radius: var(--radius-md);
   overflow: hidden;
+  align-self: start;
+}
+
+@media (min-width: 60em) {
+  .about__portrait { width: 100%; }
 }
 
 .about__portrait img {
@@ -587,7 +605,19 @@ ul { padding: 0; list-style: none; }
   background: rgba(138,122,92,0.08);
 }
 
-.about__copy { display: flex; flex-direction: column; gap: var(--space-6); }
+.about__intro {
+  grid-area: intro;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.about__body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
 
 /* =========================================================
    Services — Cards, deckend, mit Schatten
