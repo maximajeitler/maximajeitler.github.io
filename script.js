@@ -244,6 +244,43 @@ function animateScrollTo(targetY, duration) {
   requestAnimationFrame(step);
 }
 
+/* =========================================================
+   5) Gauge — der Zeiger im Hero zeigt den Scroll-Fortschritt
+   der ganzen Seite: leer am Anfang, "maxed out" ganz unten.
+   Läuft über eine kritisch gedämpfte Annäherung pro Frame
+   (kein Spring-Objekt nötig, reine Werte-Interpolation) —
+   dadurch jederzeit unterbrechbar, auch bei schnellem Scrollen.
+   ========================================================= */
+
+const needle = document.querySelector(".gauge__needle");
+
+if (needle) {
+  const MIN_DEG = -78;
+  const MAX_DEG = 78;
+  let current = MIN_DEG;
+  let target = MIN_DEG;
+
+  function updateTarget() {
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const p = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+    target = MIN_DEG + p * (MAX_DEG - MIN_DEG);
+  }
+
+  function tick() {
+    const ease = reducedMotion.matches ? 1 : 0.12;
+    current += (target - current) * ease;
+    needle.style.transform = `rotate(${current}deg)`;
+    requestAnimationFrame(tick);
+  }
+
+  updateTarget();
+  current = target;
+  window.addEventListener("scroll", updateTarget, { passive: true });
+  window.addEventListener("resize", updateTarget);
+  requestAnimationFrame(tick);
+}
+
 const navEl = document.querySelector(".nav");
 
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
