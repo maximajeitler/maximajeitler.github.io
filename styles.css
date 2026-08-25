@@ -173,6 +173,7 @@ ul { padding: 0; list-style: none; }
   font-weight: 700;
   color: var(--sand);
   overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .display-2 {
@@ -183,6 +184,7 @@ ul { padding: 0; list-style: none; }
   font-weight: 600;
   color: var(--sand);
   overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 .display-3 {
@@ -250,8 +252,8 @@ ul { padding: 0; list-style: none; }
 
 .glow--hero {
   background:
-    radial-gradient(62% 68% at 22% 12%, rgba(200,100,56,0.38), transparent 70%),
-    radial-gradient(46% 50% at 88% 82%, rgba(138,122,92,0.26), transparent 72%);
+    radial-gradient(58% 62% at 32% 10%, rgba(200,100,56,0.36), transparent 70%),
+    radial-gradient(54% 58% at 72% 84%, rgba(138,122,92,0.28), transparent 72%);
 }
 
 .glow--about {
