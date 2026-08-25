@@ -243,35 +243,35 @@ ul { padding: 0; list-style: none; }
 
 .glow {
   position: absolute;
-  inset: -15% -10%;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
 }
 
 .glow--hero {
   background:
-    radial-gradient(50% 55% at 22% 12%, rgba(200,100,56,0.32), transparent 68%),
-    radial-gradient(38% 42% at 88% 82%, rgba(138,122,92,0.22), transparent 70%);
+    radial-gradient(circle 320px at 22% 12%, rgba(200,100,56,0.22), transparent 70%),
+    radial-gradient(circle 260px at 88% 82%, rgba(138,122,92,0.16), transparent 70%);
 }
 
 .glow--about {
   background:
-    radial-gradient(42% 46% at 92% 8%, rgba(181,80,45,0.16), transparent 70%),
-    radial-gradient(46% 46% at 6% 96%, rgba(138,122,92,0.14), transparent 72%);
+    radial-gradient(circle 280px at 92% 8%, rgba(181,80,45,0.14), transparent 70%),
+    radial-gradient(circle 280px at 6% 96%, rgba(138,122,92,0.12), transparent 72%);
 }
 
 .glow--services {
-  background: radial-gradient(58% 58% at 50% -5%, rgba(200,100,56,0.24), transparent 68%);
+  background: radial-gradient(circle 360px at 50% 0%, rgba(200,100,56,0.18), transparent 70%);
 }
 
 .glow--process {
   background:
-    radial-gradient(40% 50% at -5% 45%, rgba(181,80,45,0.16), transparent 70%),
-    radial-gradient(40% 40% at 105% 90%, rgba(138,122,92,0.14), transparent 70%);
+    radial-gradient(circle 280px at 0% 45%, rgba(181,80,45,0.14), transparent 70%),
+    radial-gradient(circle 240px at 100% 90%, rgba(138,122,92,0.12), transparent 70%);
 }
 
 .glow--closing {
-  background: radial-gradient(60% 65% at 50% 25%, rgba(200,100,56,0.34), transparent 68%);
+  background: radial-gradient(circle 360px at 50% 25%, rgba(200,100,56,0.24), transparent 70%);
 }
 
 @media (max-width: 40em) {
@@ -577,7 +577,7 @@ ul { padding: 0; list-style: none; }
 
 .about__portrait {
   grid-area: photo;
-  width: 8.5rem;
+  width: 9.5rem;
   aspect-ratio: 4 / 5;
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -613,6 +613,10 @@ ul { padding: 0; list-style: none; }
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+@media (max-width: 59.99em) {
+  .about__intro h2 { font-size: clamp(1.4rem, 6.5vw, 2rem); }
 }
 
 .about__body {

@@ -1,44 +1,78 @@
 /* =========================================================
-   MAXED OUT. — Interaktions-Engine
-   Regel: alles Anfassbare läuft über Springs (Motion),
-   nie über CSS-transition/@keyframes. Animiert wird
-   ausschließlich transform + opacity.
-   ========================================================= */
+   MAXED OUT. — Interaktions-Engine (ohne externe Bibliothek)
+   Regel: alles Anfassbare läuft über Springs, nie über
+   CSS-transition/@keyframes. Animiert wird ausschließlich
+   transform und opacity.
 
-import { animate, inView } from "https://cdn.jsdelivr.net/npm/motion@11.11.13/+esm";
+   Wichtig: dieses Skript hat KEINE Abhängigkeit zu einem
+   fremden Server mehr (kein import von einem CDN). Alle
+   Federungen sind selbst geschrieben. Dadurch kann ein
+   einzelner fehlgeschlagener externer Ladevorgang nie mehr
+   das ganze Skript (inkl. Scroll-Verhalten) lahmlegen.
+   ========================================================= */
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-/* ---- Spring-Presets (aus der Skill-Referenztabelle) ----
-   UI-Default:   damping 1.0 -> bounce 0,    response 0.35
-   Momentum:     damping ~0.8 -> bounce 0.2, response 0.35
-   Drawer/Sheet: damping 0.8 -> bounce 0.2,  response 0.3   */
-const SPRING_UI = { type: "spring", bounce: 0, duration: 0.35 };
-const SPRING_MOMENTUM = { type: "spring", bounce: 0.2, duration: 0.35 };
-const SPRING_DRAWER = { type: "spring", bounce: 0.2, duration: 0.3 };
-const INSTANT = { duration: reducedMotion.matches ? 0.12 : 0.2, easing: "ease-out" };
+/* ---------------------------------------------------------
+   Federn (Spring) — echte Masse-Feder-Dämpfer-Simulation,
+   pro Frame numerisch integriert. Ersetzt die drei Presets
+   aus der Skill-Referenztabelle:
+   UI-Default (damping 1.0)   -> stiffness 210, damping 26
+   Momentum   (damping ~0.8)  -> stiffness 210, damping 20
+   Drawer/Sheet (damping 0.8) -> stiffness 220, damping 24
+--------------------------------------------------------- */
 
-function springFor(preset) {
-  return reducedMotion.matches ? INSTANT : preset;
+const SPRING_UI = { stiffness: 210, damping: 26 };
+const SPRING_MOMENTUM = { stiffness: 210, damping: 20 };
+const SPRING_DRAWER = { stiffness: 220, damping: 24 };
+
+function springTo(from, to, { stiffness, damping, mass = 1, onUpdate, onComplete }) {
+  if (reducedMotion.matches) {
+    onUpdate(to);
+    onComplete?.();
+    return;
+  }
+  let value = from;
+  let velocity = 0;
+  let lastTime = performance.now();
+
+  function step(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.064);
+    lastTime = now;
+    const force = -stiffness * (value - to);
+    const damp = -damping * velocity;
+    velocity += ((force + damp) / mass) * dt;
+    value += velocity * dt;
+    onUpdate(value);
+
+    if (Math.abs(to - value) > 0.001 || Math.abs(velocity) > 0.001) {
+      requestAnimationFrame(step);
+    } else {
+      onUpdate(to);
+      onComplete?.();
+    }
+  }
+  requestAnimationFrame(step);
 }
 
 /* =========================================================
-   1) Press-Feedback — auf pointerdown, nicht auf Loslassen
+   1) Press-Feedback — auf pointerdown, nicht beim Loslassen
    ========================================================= */
 
 function wirePressFeedback(selector, downScale = 0.96) {
   document.querySelectorAll(selector).forEach((el) => {
+    let current = 1;
     let pressed = false;
 
     el.addEventListener("pointerdown", () => {
       pressed = true;
-      animate(el, { scale: downScale }, springFor(SPRING_UI));
+      springTo(current, downScale, { ...SPRING_UI, onUpdate: (v) => { current = v; el.style.transform = `scale(${v})`; } });
     });
 
     const release = () => {
       if (!pressed) return;
       pressed = false;
-      animate(el, { scale: 1 }, springFor(SPRING_MOMENTUM));
+      springTo(current, 1, { ...SPRING_MOMENTUM, onUpdate: (v) => { current = v; el.style.transform = `scale(${v})`; } });
     };
 
     el.addEventListener("pointerup", release);
@@ -53,19 +87,36 @@ wirePressFeedback(".nav__burger, .drawer__close", 0.9);
 wirePressFeedback(".scroll-cue", 0.88);
 wirePressFeedback(".social-link", 0.96);
 
-/* Scroll-Cue: sanftes, endloses Schweben nach unten und
-   zurück — reine Deko, kein Nutzer-Input, daher kein Spring
-   nötig, sondern ein ruhiger Ease-Loop. Respektiert
-   reduced-motion (bleibt dann einfach still stehen). */
+/* Karten: sanftes Anheben bei Hover (nur Maus) */
+document.querySelectorAll(".card").forEach((el) => {
+  let current = 0;
+  el.addEventListener("pointerenter", (e) => {
+    if (e.pointerType !== "mouse") return;
+    springTo(current, -6, { ...SPRING_UI, onUpdate: (v) => { current = v; el.style.translate = `0 ${v}px`; } });
+  });
+  el.addEventListener("pointerleave", (e) => {
+    if (e.pointerType !== "mouse") return;
+    springTo(current, 0, { ...SPRING_UI, onUpdate: (v) => { current = v; el.style.translate = `0 ${v}px`; } });
+  });
+});
+
+/* Scroll-Cue: sanftes, endloses Schweben — reine Deko,
+   kein Nutzer-Input, daher ein ruhiger Sinus-Loop statt Spring. */
 const scrollCue = document.querySelector(".scroll-cue");
 if (scrollCue && !reducedMotion.matches) {
-  animate(scrollCue, { y: [0, 10, 0] }, { duration: 1.8, repeat: Infinity, easing: "ease-in-out" });
+  const start = performance.now();
+  function bounce(now) {
+    const t = (now - start) / 1000;
+    const y = Math.sin(t * (Math.PI / 1.6)) * 6 + 6;
+    scrollCue.style.translate = `0 ${y}px`;
+    requestAnimationFrame(bounce);
+  }
+  requestAnimationFrame(bounce);
 }
 
 /* =========================================================
-   Cursor-Licht auf Buttons — die Position folgt der Maus
-   1:1 (kein Lag, das soll sich wie echtes Licht anfühlen),
-   nur das Auf-/Abblenden beim Rein-/Rausfahren ist gefedert.
+   Cursor-Licht auf Buttons — Position folgt der Maus 1:1
+   (kein Lag), nur das Auf-/Abblenden ist gefedert.
    ========================================================= */
 
 function wireCursorGlow(selector) {
@@ -84,42 +135,17 @@ function wireCursorGlow(selector) {
 
     el.addEventListener("pointerenter", (e) => {
       if (e.pointerType !== "mouse") return;
-      animate(current, 0.4, {
-        ...SPRING_UI,
-        onUpdate: (v) => {
-          current = v;
-          el.style.setProperty("--glow-a", v);
-        },
-      });
+      springTo(current, 0.4, { ...SPRING_UI, onUpdate: (v) => { current = v; el.style.setProperty("--glow-a", v); } });
     });
 
     el.addEventListener("pointerleave", (e) => {
       if (e.pointerType !== "mouse") return;
-      animate(current, 0, {
-        ...SPRING_MOMENTUM,
-        onUpdate: (v) => {
-          current = v;
-          el.style.setProperty("--glow-a", v);
-        },
-      });
+      springTo(current, 0, { ...SPRING_MOMENTUM, onUpdate: (v) => { current = v; el.style.setProperty("--glow-a", v); } });
     });
   });
 }
 
 wireCursorGlow(".btn, .social-link, .scroll-cue");
-
-/* Karten: sanftes Anheben bei Hover (nur Pointer-Geräte,
-   spring-basiert, kein CSS-transition) */
-document.querySelectorAll(".card").forEach((el) => {
-  el.addEventListener("pointerenter", (e) => {
-    if (e.pointerType !== "mouse") return;
-    animate(el, { y: "-0.35rem" }, springFor(SPRING_UI));
-  });
-  el.addEventListener("pointerleave", (e) => {
-    if (e.pointerType !== "mouse") return;
-    animate(el, { y: "0rem" }, springFor(SPRING_UI));
-  });
-});
 
 /* =========================================================
    2) Mobile Drawer — Enter-/Exit-Pfad identisch,
@@ -136,18 +162,21 @@ function openDrawer() {
   if (!drawer) return;
   drawer.dataset.open = "true";
   document.body.style.overflow = "hidden";
-  animate(scrim, { opacity: [0, 1] }, springFor(SPRING_UI));
-  animate(panel, { x: ["100%", "0%"] }, springFor(SPRING_DRAWER));
+  scrim.style.opacity = "0";
+  springTo(0, 1, { ...SPRING_UI, onUpdate: (v) => { scrim.style.opacity = v; } });
+  springTo(100, 0, { ...SPRING_DRAWER, onUpdate: (v) => { panel.style.transform = `translateX(${v}%)`; } });
   burger.setAttribute("aria-expanded", "true");
 }
 
 function closeDrawer() {
   if (!drawer) return;
   document.body.style.overflow = "";
-  animate(scrim, { opacity: [1, 0] }, springFor(SPRING_UI));
-  // exakt derselbe Weg zurück, den es hereinkam
-  animate(panel, { x: ["0%", "100%"] }, springFor(SPRING_DRAWER))
-    .finished.then(() => { drawer.dataset.open = "false"; });
+  springTo(1, 0, { ...SPRING_UI, onUpdate: (v) => { scrim.style.opacity = v; } });
+  springTo(0, 100, {
+    ...SPRING_DRAWER,
+    onUpdate: (v) => { panel.style.transform = `translateX(${v}%)`; },
+    onComplete: () => { drawer.dataset.open = "false"; },
+  });
   burger?.setAttribute("aria-expanded", "false");
 }
 
@@ -160,35 +189,34 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* =========================================================
-   3) Scroll-Reveal — Section-Inhalte tauchen aus dem
-   Präsentationswert auf (opacity + kleiner Y-Offset)
+   3) Scroll-Reveal — Section-Inhalte tauchen sanft auf.
+   Standardzustand im HTML/CSS ist sichtbar; erst wenn wir
+   wissen, dass JS läuft, blenden wir kurz aus und wieder ein.
    ========================================================= */
 
-document.querySelectorAll("[data-reveal]").forEach((el) => {
-  // Erst JETZT, da wir wissen dass JS läuft, unsichtbar machen —
-  // Standardzustand im HTML/CSS ist immer sichtbar.
-  el.style.opacity = "0";
-  el.style.transform = "translateY(1.25rem)";
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      springTo(0, 1, { ...SPRING_UI, onUpdate: (v) => { el.style.opacity = v; } });
+      springTo(20, 0, { ...SPRING_UI, onUpdate: (v) => { el.style.translate = `0 ${v}px`; } });
+      revealObserver.unobserve(el);
+    });
+  },
+  { threshold: 0.3 }
+);
 
-  inView(
-    el,
-    () => {
-      animate(
-        el,
-        { opacity: [0, 1], y: ["1.25rem", "0rem"] },
-        springFor(SPRING_UI)
-      );
-    },
-    { amount: 0.3 }
-  );
+document.querySelectorAll("[data-reveal]").forEach((el) => {
+  el.style.opacity = "0";
+  el.style.translate = "0 20px";
+  revealObserver.observe(el);
 });
 
 /* =========================================================
-   4) Anchor-Scroll mit eigenem Tempo. CSS allein
-   (scroll-behavior: smooth) lässt sich in der Geschwindigkeit
-   nicht steuern — dafür hier ein sanft ein-/ausschwingender
-   Scroll mit fester, bewusst ruhiger Dauer. CSS bleibt als
-   Fallback aktiv, falls dieses Skript nicht laden sollte.
+   4) Anchor-Scroll mit eigenem, ruhigem Tempo. CSS
+   (scroll-behavior: smooth) bleibt als Fallback aktiv, falls
+   dieses Skript aus irgendeinem Grund nicht laufen sollte.
    ========================================================= */
 
 function easeInOutCubic(t) {
@@ -200,11 +228,6 @@ function animateScrollTo(targetY, duration) {
   const diff = targetY - startY;
   const startTime = performance.now();
 
-  // Wichtig: html hat CSS scroll-behavior:smooth. Ohne diese Zeile
-  // würde JEDER scrollTo()-Aufruf zusätzlich vom Browser selbst
-  // "smooth" interpoliert — zwei Animationen kämpfen gegeneinander,
-  // das erzeugt genau das Ruckeln. Für die Dauer unserer eigenen
-  // Animation schalten wir das kurz aus und danach wieder an.
   const html = document.documentElement;
   const previousBehavior = html.style.scrollBehavior;
   html.style.scrollBehavior = "auto";
@@ -237,7 +260,7 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     if (reducedMotion.matches) {
       window.scrollTo(0, targetY);
     } else {
-      animateScrollTo(targetY, 1400); // ruhiges Tempo, kein hartes Springen
+      animateScrollTo(targetY, 1400);
     }
   });
 });
