@@ -173,7 +173,6 @@ ul { padding: 0; list-style: none; }
   font-weight: 700;
   color: var(--sand);
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 .display-2 {
@@ -184,7 +183,6 @@ ul { padding: 0; list-style: none; }
   font-weight: 600;
   color: var(--sand);
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 .display-3 {
